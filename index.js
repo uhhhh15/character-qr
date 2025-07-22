@@ -15,7 +15,7 @@
     async function waitForElement(selector, timeout = 15000) { return new Promise((resolve, reject) => { const i=setInterval(()=>{ const e=window.parent.document.querySelector(selector); if(e){clearInterval(i);clearTimeout(t);resolve(e);}},100); const t=setTimeout(()=>{clearInterval(i);reject(new Error(`Element "${selector}" not found`));},timeout); }); }
     function debounce(func, wait) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; }
 
-    // --- 3. 核心功能 (无变化) ---
+    // --- 3. 核心功能 ---
     function getProfileFromApi() { try { const q = window.parent.quickReplyApi; if (!q?.settings?.chatConfig?.setList) return null; return { profileData: q.settings.chatConfig.setList.filter(link => link?.set?.name).map(link => ({ name: link.set.name, isVisible: link.isVisible })) }; } catch (e) { return null; } }
     function loadProfileFromMetadata(characterId) { if (characterId === undefined || characterId === null) return null; const character = SillyTavern.characters[characterId]; if (character && character.data && character.data.extensions) { return character.data.extensions[METADATA_KEY] || null; } return null; }
     async function saveProfileToMetadata(characterId, profileData) { if (characterId === undefined || characterId === null) return; try { await SillyTavern.writeExtensionField(characterId, METADATA_KEY, profileData); await (TavernHelper?.builtin?.saveCharacterDebounced || SillyTavern.saveSettingsDebounced)(); } catch (error) { /* Silent */ } }
@@ -76,7 +76,7 @@
                 syncUiOnLoad('CHAT_CHANGED');
             }, 400);
 
-            // 【核心修正】采用您提供的、绝对正确的两步事件监听法
+            // 两步事件监听法
             eventSource.on(event_types.CHARACTER_PAGE_LOADED, () => {
                 // 注册一个一次性的监听器，等待“绿灯”信号
                 eventSource.once(event_types.SETTINGS_UPDATED, () => {
